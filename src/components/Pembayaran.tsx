@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import { formatRupiah } from "../lib/formatRupiah";
 import { motion } from "framer-motion";
 import {
@@ -15,15 +15,15 @@ import {
   Key,
   Ban,
   TrendingUp,
-  Calculator,
   PieChart,
   ChevronRight,
   Lock,
-  Info,
   AlertCircle,
+  MessageSquare, // Icon untuk notes
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
+import { useSearchParams } from "next/navigation";
 
 // --- STATIC DATA ---
 const PRICE_TOTAL = 250_000_000;
@@ -76,18 +76,19 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// --- SUB-COMPONENT: FORM KONSULTASI ---
-const InlinePromoForm = () => {
+// --- SUB-COMPONENT: FORM LOGIC (CONTENT) ---
+const InlinePromoFormContent = () => {
   const [form, setForm] = useState({
     nama: "",
     domisili: "",
     whatsapp: "",
     jadwal: "",
-    keterangan: "",
+    keterangan: "", // State untuk notes
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams(); // Hook untuk ambil UTM
   const today = new Date().toISOString().split("T")[0];
 
   const handleChange = (
@@ -112,6 +113,12 @@ const InlinePromoForm = () => {
     setIsSubmitting(true);
 
     try {
+      // 1. Ambil UTM Parameters
+      const utmSource = searchParams?.get("utm_source") || "direct";
+      const utmMedium = searchParams?.get("utm_medium") || "-";
+      const utmCampaign = searchParams?.get("utm_campaign") || "-";
+
+      // 2. Format Keterangan (Gabungkan Jadwal + Notes User)
       let finalKeterangan = form.keterangan.trim();
       if (form.jadwal) {
         const tgl = new Date(form.jadwal).toLocaleDateString("id-ID", {
@@ -120,19 +127,58 @@ const InlinePromoForm = () => {
           month: "long",
           day: "numeric",
         });
-        finalKeterangan = `[Request Jadwal: ${tgl}] \n${finalKeterangan}`;
+        // Tambahkan info jadwal di awal string keterangan
+        const infoJadwal = `[Request Jadwal: ${tgl}]`;
+        finalKeterangan = finalKeterangan
+          ? `${infoJadwal}\n${finalKeterangan}`
+          : infoJadwal;
       }
 
+      // 3. Insert ke Supabase
       const { error } = await supabase.from("leads").insert({
         nama: form.nama.trim(),
         domisili: form.domisili.trim(),
         whatsapp: form.whatsapp.trim(),
-        keterangan: finalKeterangan,
-        source: "Payment Page (Promo 250jt)",
+        keterangan: finalKeterangan, // Kirim hasil gabungan
+        source: `Payment Page (Promo 250jt) [${utmSource}]`,
         status: "Baru",
       });
 
       if (error) throw new Error(error.message);
+
+      // 4. Kirim Notifikasi via API (Trigger Tele)
+      const payload = JSON.stringify({
+        ...form,
+        jadwal: form.jadwal,
+        keterangan: finalKeterangan, // Pastikan field ini terkirim
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        user_agent:
+          typeof navigator !== "undefined" ? navigator.userAgent : "Unknown",
+        page_source: "Payment Page (Promo 250jt)",
+      });
+
+      try {
+        fetch("/api/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+        });
+      } catch (e) {
+        console.warn("Notification API failed silently");
+      }
+
+      // 5. GTM Tracking
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: "lead_form_submit",
+          form_type: "payment_page_promo",
+          user_data: {
+            city: form.domisili,
+          },
+        });
+      }
 
       toast.success("Permintaan terkirim. Admin akan segera menghubungi Anda.");
       setForm({
@@ -237,6 +283,19 @@ const InlinePromoForm = () => {
               </span>
             )}
           </div>
+
+          {/* --- KOLOM NOTES / KETERANGAN --- */}
+          <div className="relative group">
+            <MessageSquare className="absolute left-4 top-5 w-5 h-5 text-stone-400 group-focus-within:text-stone-800 transition-colors" />
+            <textarea
+              name="keterangan"
+              value={form.keterangan}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Ada pertanyaan atau catatan tambahan?"
+              className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-stone-800 focus:bg-white outline-none text-base transition-all placeholder:text-stone-400 resize-none"
+            />
+          </div>
         </div>
 
         <motion.button
@@ -265,6 +324,17 @@ const InlinePromoForm = () => {
         </p>
       </form>
     </div>
+  );
+};
+
+// --- WRAPPER FOR SUSPENSE (Required for useSearchParams) ---
+const InlinePromoForm = () => {
+  return (
+    <Suspense
+      fallback={<div className="p-10 text-center">Loading Form...</div>}
+    >
+      <InlinePromoFormContent />
+    </Suspense>
   );
 };
 
@@ -441,7 +511,7 @@ export default function PembayaranPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-stone-900 leading-none">
-                    Simulasi Profit 
+                    Simulasi Profit
                   </h3>
                   <p className="text-base text-stone-700 mt-2 font-medium flex flex-wrap items-center gap-1.5">
                     Basis Sewa:
