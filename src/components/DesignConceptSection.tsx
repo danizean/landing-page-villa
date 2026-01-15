@@ -111,7 +111,6 @@ export const DesignConceptSection = () => {
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      // Scroll lebih jauh karena kartu sekarang lebih lebar (500px + gap)
       const scrollAmount = 520;
       scrollRef.current.scrollBy({
         left: direction === "right" ? scrollAmount : -scrollAmount,
@@ -128,7 +127,6 @@ export const DesignConceptSection = () => {
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-[#fffdf9] to-white z-0 pointer-events-none" />
 
-      {/* Gunakan max-w-7xl agar selaras dengan section Layout & Lokasi */}
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         {/* --- 1. HEADER SECTION --- */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10 sm:mb-14">
@@ -156,7 +154,7 @@ export const DesignConceptSection = () => {
             <div className="prose prose-stone text-stone-600 leading-relaxed text-base sm:text-lg max-w-2xl">
               <p>
                 Casa de Kayana dirancang bukan hanya untuk &quot;terlihat
-                bagus&quot;, tapi untuk
+                astetik&quot;, tapi untuk
                 <strong> meminimalkan biaya perawatan</strong> jangka panjang.
                 Kombinasi desain <i>Timeless</i> dan material berkualitas
                 memastikan aset Anda tetap bernilai tinggi.
@@ -194,10 +192,6 @@ export const DesignConceptSection = () => {
         </div>
 
         {/* --- 2. GALLERY SLIDER (WIDER & ALIGNED) --- */}
-        {/* PERBAIKAN ALIGNMENT:
-            - Menghapus negative margin pada desktop (lg:mx-0) agar slider start tepat di garis grid container.
-            - Tetap menggunakan negative margin di mobile (-mx-4) agar full bleed edge-to-edge.
-        */}
         <div
           ref={scrollRef}
           className="
@@ -217,7 +211,10 @@ export const DesignConceptSection = () => {
                 w-[85vw] aspect-[4/5]
                 /* DESKTOP: Menjadi Landscape (Wide) agar lebih 'mahal' & detail terlihat */
                 sm:w-[500px] sm:aspect-[16/10]
-                cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500
+                
+                /* FIX BUG OUTLINE KUNING: Gunakan focus-visible alih-alih focus biasa */
+                cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500
+                
                 shadow-sm hover:shadow-lg transition-all duration-500
               "
             >
@@ -225,7 +222,7 @@ export const DesignConceptSection = () => {
                 src={item.src}
                 alt={`${item.title} - Casa de Kayana`}
                 fill
-                loading="lazy"
+                placeholder="blur"
                 sizes="(max-width: 640px) 85vw, 500px"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
@@ -250,7 +247,6 @@ export const DesignConceptSection = () => {
             </div>
           ))}
 
-          {/* Spacer kanan untuk mobile & desktop agar card terakhir tidak mentok tepi */}
           <div className="w-1 shrink-0" />
         </div>
 

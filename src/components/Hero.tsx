@@ -12,8 +12,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-// --- ASSETS ---
-// Pastikan path ini benar di project Anda
 import VillaExterior from "../assets/images/fasad.png";
 import LivingRoom from "../assets/images/fasad-unit.png";
 import Bedroom from "../assets/images/private-pool.png";
@@ -22,7 +20,7 @@ const images = [
   {
     src: VillaExterior,
     alt: "Fasad Casa de Kayana - Villa Bohemian Modern Jogja Dekat UII",
-    priority: true, // Hanya gambar pertama yang diprioritaskan untuk LCP
+    priority: true, 
   },
   {
     src: LivingRoom,
@@ -36,8 +34,6 @@ const images = [
   },
 ];
 
-// --- ANIMATIONS ---
-// Defined outside component to prevent recreation on render
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -65,7 +61,6 @@ const bgVariants = {
 export const Hero = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Memoized function for slide change
   const nextSlide = useCallback(() => {
     setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   }, []);
@@ -76,21 +71,20 @@ export const Hero = () => {
   }, [nextSlide]);
 
   return (
-    // ID 'hero' untuk anchor link. h-[100dvh] untuk mobile browser toolbar support.
+
     <header
       id="hero"
       className="relative w-full h-[100dvh] min-h-[600px] overflow-hidden bg-gray-950 font-sans"
     >
-      {/* --- BACKGROUND SLIDER --- */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={currentImage}
             variants={bgVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 1.5, ease: "easeOut" }} // Durasi sedikit dipercepat agar tidak terasa 'lag'
+            transition={{ duration: 1.5, ease: "easeOut" }} 
             className="absolute inset-0 w-full h-full"
           >
             <Image
@@ -99,11 +93,9 @@ export const Hero = () => {
               fill
               priority={images[currentImage].priority}
               sizes="100vw"
-              quality={85} // Turunkan sedikit dari 90 ke 85 (kasat mata sama, file size jauh lebih kecil)
+              quality={85} 
               className="object-cover"
-              placeholder="blur" // Opsional: jika import static, nextjs otomatis generate blurDataURL
             />
-            {/* Gradient Overlays combined to reduce DOM nodes if possible, but kept separate for specific layering */}
             <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-950/50 to-black/20" />
             <div className="absolute inset-0 bg-black/10" />
           </motion.div>
@@ -117,7 +109,7 @@ export const Hero = () => {
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="max-w-3xl lg:max-w-4xl pt-16 sm:pt-0" // Tambah padding top di mobile agar tidak ketabrak navbar
+            className="max-w-3xl lg:max-w-4xl pt-16 sm:pt-0" 
           >
             {/* 1. BADGES (Trust & Location) */}
             <motion.div
@@ -141,7 +133,7 @@ export const Hero = () => {
             >
               Villa Eksklusif <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
-                Private Pool 250 Juta
+                Private Pool <br /> 250 Juta
               </span>
             </motion.h1>
 
@@ -151,7 +143,7 @@ export const Hero = () => {
               className="text-gray-100 text-base sm:text-lg lg:text-xl max-w-2xl leading-relaxed mb-8 sm:mb-10 font-medium drop-shadow-md opacity-90"
             >
               <strong>Casa de Kayana</strong> hadir sebagai solusi investasi
-              cerdas. Hunian estetik dengan fasilitas lengkap, lokasi strategis
+              cerdas. Villa atau Kos estetik dengan fasilitas lengkap, lokasi strategis
               di Jakal, dan skema pembayaran <strong>Tanpa DP</strong> yang aman
               & transparan.
             </motion.p>

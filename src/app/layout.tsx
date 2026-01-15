@@ -137,13 +137,15 @@ export default function RootLayout({
           "antialiased bg-[#F9FAFB] text-slate-900"
         )}
       >
+        {/* --- 1. GOOGLE ANALYTICS (GA4) --- */}
+        {/* Menggunakan lazyOnload agar tidak memblokir rendering awal */}
         <Script
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         />
         <Script
           id="google-analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -157,9 +159,10 @@ export default function RootLayout({
         />
 
         {/* --- 2. GOOGLE TAG MANAGER (HEAD SCRIPT) --- */}
+        {/* Diubah ke lazyOnload untuk mengurangi TBT */}
         <Script
           id="gtm-script"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -172,6 +175,7 @@ export default function RootLayout({
         />
 
         {/* --- 3. GOOGLE TAG MANAGER (BODY NOSCRIPT) --- */}
+        {/* Noscript tetap dirender server-side, tidak perlu strategi JS */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -183,9 +187,10 @@ export default function RootLayout({
         </noscript>
 
         {/* --- 4. META PIXEL SCRIPT --- */}
+        {/* Diubah ke lazyOnload */}
         <Script
           id="fb-pixel"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               !function(f,b,e,v,n,t,s)
@@ -214,9 +219,10 @@ export default function RootLayout({
         </noscript>
 
         {/* --- 5. MICROSOFT CLARITY --- */}
+        {/* Diubah ke lazyOnload */}
         <Script
           id="microsoft-clarity"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(c,l,a,r,i,t,y){

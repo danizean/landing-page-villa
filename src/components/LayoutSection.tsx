@@ -158,7 +158,9 @@ export const FasilitasSection = () => {
                   aria-selected={isActive}
                   aria-controls={`panel-${plan.id}`}
                   onClick={() => setActivePlan(plan.id)}
-                  className={`flex-1 py-4 px-2 sm:px-6 text-sm sm:text-base font-bold flex items-center justify-center gap-2 transition-all relative outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 ${
+                  // FIX BUG OUTLINE KUNING: Mengganti focus:ring menjadi focus-visible:ring
+                  // Ini menghilangkan outline kuning saat di-klik mouse, tapi tetap muncul saat navigasi keyboard (tab)
+                  className={`flex-1 py-4 px-2 sm:px-6 text-sm sm:text-base font-bold flex items-center justify-center gap-2 transition-all relative outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500 ${
                     isActive
                       ? "text-amber-700 bg-amber-50/50"
                       : "text-stone-500 hover:bg-stone-100"
@@ -207,9 +209,10 @@ export const FasilitasSection = () => {
                     src={currentData.src}
                     alt={currentData.title}
                     fill
+                    placeholder="blur" // Efek blur saat loading
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, 800px"
-                    priority // Image ini penting di fold atas (relatif terhadap scroll posisi)
+                    priority // Image ini penting di fold atas
                   />
                 </motion.div>
               </AnimatePresence>
@@ -269,7 +272,7 @@ export const FasilitasSection = () => {
         </div>
       </div>
 
-      {/* --- MODAL ZOOM (Portal Candidate) --- */}
+      {/* --- MODAL ZOOM --- */}
       <AnimatePresence>
         {isZoomed && (
           <motion.div
@@ -282,7 +285,7 @@ export const FasilitasSection = () => {
             role="dialog"
           >
             <button
-              className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-white"
+              className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
               onClick={() => setIsZoomed(false)}
               aria-label="Tutup zoom"
             >
@@ -297,6 +300,7 @@ export const FasilitasSection = () => {
                 alt={`Zoom View ${currentData.title}`}
                 width={1200}
                 height={800}
+                placeholder="blur"
                 className="object-contain w-full h-full rounded-lg"
                 quality={90}
               />

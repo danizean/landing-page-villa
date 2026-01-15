@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   MapPin,
@@ -11,6 +12,7 @@ import {
   Store,
   Zap,
   University,
+  Map as MapIcon,
 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -22,7 +24,7 @@ interface LocationHighlight {
   highlight: boolean;
 }
 
-// --- STATIC DATA (Moved outside component for performance) ---
+// --- STATIC DATA ---
 const locationHighlights: LocationHighlight[] = [
   {
     icon: <GraduationCap className="w-5 h-5" />,
@@ -68,22 +70,13 @@ const locationHighlights: LocationHighlight[] = [
   },
 ];
 
-// Unused data commented out to reduce bundle size/linter warnings
-/*
-const investmentReasons = [
-  "Captive Market Jelas (Ribuan Mahasiswa UII)",
-  "Kenaikan Harga Tanah (Capital Gain) Tinggi",
-  "Lokasi Favorit Wisatawan (Udara Sejuk)",
-];
-*/
-
-// --- ANIMATION VARIANTS (Static) ---
+// --- ANIMATION VARIANTS ---
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// --- SUB-COMPONENT (Memoized by default in Next.js distinct files, light enough here) ---
+// --- SUB-COMPONENT ---
 const LocationCard = ({ icon, text, sub, highlight }: LocationHighlight) => (
   <article
     className={`
@@ -99,12 +92,11 @@ const LocationCard = ({ icon, text, sub, highlight }: LocationHighlight) => (
       className={`flex-shrink-0 p-2 rounded-lg mt-0.5 ${
         highlight ? "bg-amber-500 text-white" : "bg-stone-100 text-stone-500"
       }`}
-      aria-hidden="true" // Icon is decorative
+      aria-hidden="true"
     >
       {icon}
     </div>
     <div>
-      {/* Changed H4 to H3 for better SEO Hierarchy (H2 -> H3) */}
       <h3
         className={`text-sm sm:text-base font-bold leading-tight ${
           highlight ? "text-amber-900" : "text-stone-800"
@@ -118,6 +110,9 @@ const LocationCard = ({ icon, text, sub, highlight }: LocationHighlight) => (
 );
 
 export const LocationDetail = () => {
+  // STATE: Untuk Facade Map (Optimasi Performa)
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+
   // Schema Markup for Local SEO
   const jsonLd = {
     "@context": "https://schema.org",
@@ -144,7 +139,7 @@ export const LocationDetail = () => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Background Pattern - Optimized with CSS opacity instead of heavy SVG */}
+      {/* Background Pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"
         aria-hidden="true"
@@ -202,33 +197,54 @@ export const LocationDetail = () => {
 
           {/* KOLOM KANAN: PETA (Span 5 - Sticky) */}
           <div className="lg:col-span-5 w-full h-full lg:sticky lg:top-28">
-            <div className="relative w-full h-[350px] lg:h-[550px] overflow-hidden rounded-3xl shadow-xl border-4 border-white bg-stone-200">
-              {/* IFRAME OPTIMIZATION: Loading Lazy & Title for A11y */}
-              <iframe
-                title="Peta Lokasi Casa de Kayana"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.8892639018045!2d110.40762737476496!3d-7.69503189232235!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5ff515647429%3A0x8baa86a35c538624!2sCasa%20De%20Kayana!5e0!3m2!1sid!2sid!4v1768290324149!5m2!1sid!2sid" // PERHATIAN: Ganti dengan link embed Google Maps asli
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen={true}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="absolute inset-0 w-full h-full grayscale-[10%] hover:grayscale-0 transition-all duration-700"
-              />
+            <div className="relative w-full h-[350px] lg:h-[550px] overflow-hidden rounded-3xl shadow-xl border-4 border-white bg-stone-200 group">
+              {/* --- 1. MAP FACADE (PLACEHOLDER) --- */}
+              {/* Ini ditampilkan SEBELUM user klik, menghemat resource browser sangat besar */}
+              {!isMapLoaded ? (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 hover:bg-stone-50 transition-colors cursor-pointer z-10 group-hover:bg-stone-50"
+                  onClick={() => setIsMapLoaded(true)}
+                  aria-label="Klik untuk memuat peta interaktif"
+                >
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 shadow-sm animate-pulse">
+                    <MapIcon className="w-8 h-8 text-amber-600" />
+                  </div>
+                  <p className="font-bold text-stone-700 text-lg">
+                    Lihat Peta Interaktif
+                  </p>
+                  <p className="text-sm text-stone-500 mt-1">
+                    Klik untuk memuat Google Maps
+                  </p>
+                </div>
+              ) : (
+                /* --- 2. IFRAME REAL --- */
+                /* Dimuat HANYA setelah klik. URL sudah diperbarui sesuai request. */
+                <iframe
+                  title="Peta Lokasi Casa de Kayana"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.889263830226!2d110.4102023!3d-7.695031899999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5ff515647429%3A0x8baa86a35c538624!2sCasa%20De%20Kayana!5e0!3m2!1sid!2sid!4v1768489582846!5m2!1sid!2sid"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="absolute inset-0 w-full h-full animate-in fade-in duration-500"
+                />
+              )}
 
-              {/* Overlay Button CTA */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[90%]">
+              {/* Overlay Button CTA (Always visible) */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[90%] z-20 pointer-events-none">
                 <a
-                  href="https://goo.gl/maps/placeholder" // PERHATIAN: Ganti dengan link Google Maps asli
+                  href="https://goo.gl/maps/placeholder" // Anda bisa mengganti ini dengan URL "Share" Google Maps jika ada
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/95 backdrop-blur-md text-stone-900 text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all border border-stone-200 group"
+                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/95 backdrop-blur-md text-stone-900 text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all border border-stone-200 group pointer-events-auto"
                 >
                   <ExternalLink
                     size={16}
                     className="text-amber-600 group-hover:text-amber-500"
                   />
-                  Buka Google Maps
+                  Buka App Google Maps
                 </a>
               </div>
             </div>

@@ -4,23 +4,23 @@ import { useState, useRef } from "react";
 import { formatRupiah } from "../lib/formatRupiah";
 import { motion } from "framer-motion";
 import {
-  Wallet,
   CheckCircle,
   User,
   Phone,
   MapPin,
   Calendar,
   ShieldCheck,
-  MessageCircleQuestion,
   Coffee,
   Building2,
   Key,
   Ban,
-  Lock,
   TrendingUp,
   Calculator,
   PieChart,
   ChevronRight,
+  Lock,
+  Info,
+  AlertCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
@@ -48,16 +48,16 @@ const PAYMENT_STEPS = [
     step: 1,
     title: "Booking Fee",
     amount: BOOKING_FEE,
-    desc: "Tanda jadi pemesanan unit & kunci harga promo.",
-    icon: <CheckCircle className="w-5 h-5 text-green-600" />,
+    desc: "Tanda jadi pemesanan unit.",
+    icon: <CheckCircle className="w-6 h-6 text-emerald-600" />,
     highlight: false,
   },
   {
     step: 2,
-    title: "Masa Pembangunan",
+    title: "Progres Pembangunan",
     amount: 0,
-    desc: "Unit dibangun tanpa DP atau Termin. Bebas cashflow.",
-    icon: <Building2 className="w-5 h-5 text-blue-500" />,
+    desc: "Unit dibangun tanpa membebani cashflow Anda. 100% Bebas Risiko.",
+    icon: <Building2 className="w-6 h-6 text-blue-500" />,
     highlight: true,
     customText: "TANPA DP / Termin",
   },
@@ -65,18 +65,18 @@ const PAYMENT_STEPS = [
     step: 3,
     title: "Pelunasan Unit",
     amount: PELUNASAN,
-    desc: "Dibayarkan lunas saat unit sudah jadi & pelunasan maksimal 3 hari setelah pemberitahuan unit jadi.",
-    icon: <Key className="w-5 h-5 text-amber-500" />,
+    desc: "Dibayarkan lunas HANYA saat unit sudah jadi & siap serah terima.",
+    icon: <Key className="w-6 h-6 text-amber-500" />,
     highlight: false,
   },
 ];
 
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-// --- COMPONENT: FORM KONSULTASI (OPTIMIZED SIZE) ---
+// --- SUB-COMPONENT: FORM KONSULTASI ---
 const InlinePromoForm = () => {
   const [form, setForm] = useState({
     nama: "",
@@ -151,108 +151,92 @@ const InlinePromoForm = () => {
   };
 
   return (
-    <div className="mt-10 bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden">
-      {/* Header Form - Lebih Besar */}
-      <div className="bg-slate-900 p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <Coffee size={120} aria-hidden="true" />
+    <div className="mt-12 bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden ring-1 ring-stone-900/5">
+      {/* Header Form */}
+      <div className="bg-stone-900 p-8 sm:p-10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none transform rotate-12">
+          <Coffee size={140} className="text-white" />
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
-            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-md shadow-sm animate-pulse border border-amber-400">
-              UNIT TERBATAS!
+            <span className="bg-amber-500 text-stone-900 text-[11px] font-bold px-3 py-1 rounded-full shadow-lg animate-pulse border border-amber-400">
+              HANYA 9 UNIT!
             </span>
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">
+          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
             Amankan Unit Sekarang!
           </h3>
-          <p className="text-slate-300 text-base">
-            Isi data di bawah untuk mengunci harga promo & jadwal survey.
+          <p className="text-stone-300 text-sm sm:text-base max-w-md leading-relaxed">
+            Isi data di bawah untuk amankan unit & jadwal survey lokasi.
           </p>
         </div>
       </div>
 
-      {/* Form Fields - Ukuran & Padding Diperbesar (py-4) */}
-      <form onSubmit={handleSubmit} className="p-8 space-y-5">
-        <div className="relative group">
-          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-slate-800 transition-colors" />
-          <input
-            type="text"
-            name="nama"
-            aria-label="Nama Lengkap"
-            value={form.nama}
-            onChange={handleChange}
-            placeholder="Nama Lengkap"
-            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-slate-800 outline-none text-base transition-all focus:bg-white focus:border-slate-400 placeholder:text-slate-400"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Form Fields */}
+      <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-5">
+        <div className="space-y-4">
           <div className="relative group">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-slate-800 transition-colors" />
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 group-focus-within:text-stone-800 transition-colors" />
             <input
-              type="tel"
-              name="whatsapp"
-              aria-label="Nomor WhatsApp"
-              value={form.whatsapp}
+              type="text"
+              name="nama"
+              value={form.nama}
               onChange={handleChange}
-              placeholder="WhatsApp"
-              className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-slate-800 outline-none text-base transition-all focus:bg-white focus:border-slate-400 placeholder:text-slate-400"
+              placeholder="Nama Lengkap"
+              className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-stone-800 focus:bg-white outline-none text-base transition-all placeholder:text-stone-400"
               required
             />
           </div>
-          <div className="relative group">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-slate-800 transition-colors" />
-            <input
-              type="text"
-              name="domisili"
-              aria-label="Kota Domisili"
-              value={form.domisili}
-              onChange={handleChange}
-              placeholder="Domisili"
-              className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-slate-800 outline-none text-base transition-all focus:bg-white focus:border-slate-400 placeholder:text-slate-400"
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="relative group">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 group-focus-within:text-stone-800 transition-colors" />
+              <input
+                type="tel"
+                name="whatsapp"
+                value={form.whatsapp}
+                onChange={handleChange}
+                placeholder="WhatsApp"
+                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-stone-800 focus:bg-white outline-none text-base transition-all placeholder:text-stone-400"
+                required
+              />
+            </div>
+            <div className="relative group">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 group-focus-within:text-stone-800 transition-colors" />
+              <input
+                type="text"
+                name="domisili"
+                value={form.domisili}
+                onChange={handleChange}
+                placeholder="Domisili"
+                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-stone-800 focus:bg-white outline-none text-base transition-all placeholder:text-stone-400"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="relative group">
-          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none z-10 group-focus-within:text-slate-800 transition-colors" />
-          <input
-            ref={dateInputRef}
-            type="date"
-            name="jadwal"
-            aria-label="Jadwal Survey"
-            min={today}
-            value={form.jadwal}
-            onChange={handleChange}
-            onClick={() => dateInputRef.current?.showPicker()}
-            className={`w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-slate-800 outline-none text-base cursor-pointer transition-all focus:bg-white focus:border-slate-400
-              ${!form.jadwal ? "text-transparent" : "text-slate-800"}
-            `}
-          />
-          {!form.jadwal && (
-            <span
+          <div className="relative group">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 pointer-events-none z-10 group-focus-within:text-stone-800 transition-colors" />
+            <input
+              ref={dateInputRef}
+              type="date"
+              name="jadwal"
+              min={today}
+              value={form.jadwal}
+              onChange={handleChange}
               onClick={() => dateInputRef.current?.showPicker()}
-              className="absolute left-12 top-1/2 -translate-y-1/2 text-base text-slate-400 pointer-events-none bg-transparent pr-2"
-              aria-hidden="true"
-            >
-              Jadwalkan Survey (Opsional)
-            </span>
-          )}
-        </div>
-
-        <div className="relative group">
-          <MessageCircleQuestion className="absolute left-4 top-4 w-5 h-5 text-slate-400 group-focus-within:text-slate-800 transition-colors" />
-          <textarea
-            name="keterangan"
-            aria-label="Keterangan atau Pertanyaan"
-            rows={2}
-            value={form.keterangan}
-            onChange={handleChange}
-            placeholder="Ada pertanyaan khusus?"
-            className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-slate-800 outline-none text-base resize-none transition-all focus:bg-white focus:border-slate-400 placeholder:text-slate-400"
-          />
+              className={`w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-stone-800 focus:bg-white outline-none text-base cursor-pointer transition-all
+                ${!form.jadwal ? "text-transparent" : "text-stone-800"}
+              `}
+            />
+            {!form.jadwal && (
+              <span
+                onClick={() => dateInputRef.current?.showPicker()}
+                className="absolute left-12 top-1/2 -translate-y-1/2 text-base text-stone-400 pointer-events-none bg-transparent pr-2"
+              >
+                Jadwalkan Survey (Opsional)
+              </span>
+            )}
+          </div>
         </div>
 
         <motion.button
@@ -260,19 +244,23 @@ const InlinePromoForm = () => {
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-70 flex items-center justify-center gap-2 active:scale-95 focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
+          className="w-full bg-stone-900 hover:bg-stone-800 text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-stone-900/10 transition-all disabled:opacity-70 flex items-center justify-center gap-2 group"
         >
           {isSubmitting ? (
             "Mengirim..."
           ) : (
             <>
-              <Lock size={20} /> Amankan Unit Sekarang!{" "}
-              <ChevronRight size={20} />
+              <Lock size={20} className="text-amber-500" /> Amankan Unit
+              Sekarang!{" "}
+              <ChevronRight
+                size={20}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </>
           )}
         </motion.button>
 
-        <p className="text-xs text-slate-400 text-center flex items-center justify-center gap-1.5 pt-1">
+        <p className="text-xs text-stone-400 text-center flex items-center justify-center gap-1.5 pt-2">
           <ShieldCheck size={14} /> Data Anda dijamin aman & rahasia.
         </p>
       </form>
@@ -280,7 +268,7 @@ const InlinePromoForm = () => {
   );
 };
 
-export default function PaymentSchedulePage() {
+export default function PembayaranPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Offer",
@@ -302,14 +290,15 @@ export default function PaymentSchedulePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Ambient Background */}
       <div
-        className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-40"
+        className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none"
         aria-hidden="true"
       >
-        <div className="absolute -top-20 -right-20 w-[500px] h-[500px] bg-amber-50/50 rounded-full blur-3xl" />
+        <div className="absolute -top-[10%] -right-[10%] w-[600px] h-[600px] bg-amber-50/60 rounded-full blur-[100px]" />
+        <div className="absolute top-[20%] -left-[10%] w-[400px] h-[400px] bg-stone-50/80 rounded-full blur-[80px]" />
       </div>
 
-      {/* --- LEBAR CONTAINER DIPERBESAR (max-w-7xl) --- */}
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl relative z-10">
         {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -321,12 +310,12 @@ export default function PaymentSchedulePage() {
             className="max-w-2xl"
           >
             <div className="flex items-center gap-2 mb-4">
-              <span className="w-8 h-[2px] bg-amber-500 inline-block rounded-full"></span>
+              <span className="w-10 h-[3px] bg-amber-500 inline-block rounded-full"></span>
               <span className="text-amber-600 font-bold text-sm tracking-widest uppercase">
                 Investasi & Pembayaran
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 font-serif leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 font-serif leading-[1.15]">
               Skema Aman, <br />
               <span className="text-stone-400 italic font-light">
                 Profit Transparan
@@ -341,64 +330,75 @@ export default function PaymentSchedulePage() {
             variants={fadeInUp}
             className="max-w-md"
           >
-            <p className="text-stone-600 text-base leading-relaxed border-l-2 border-stone-200 pl-4">
+            <p className="text-stone-600 text-base sm:text-lg leading-relaxed border-l-4 border-amber-500/30 pl-6">
               Kami menawarkan keamanan transaksi tertinggi. Cukup Booking Fee,
               sisanya dilunasi setelah bangunan berdiri.{" "}
-              <strong>Tanpa DP, Tanpa Risiko Mangkrak.</strong>
+              <strong className="text-stone-900">
+                Tanpa DP, Tanpa Risiko Mangkrak.
+              </strong>
             </p>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          {/* --- KOLOM KIRI DIPERBESAR (Span 8 dari 12) --- */}
-          {/* Ini membuat form terlihat lebih lebar dan proporsional */}
-          <div className="lg:col-span-8 space-y-10">
-            {/* Total Price Box */}
-            <div className="bg-stone-50 border border-stone-200 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        {/* --- CONTENT GRID --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* KOLOM KIRI (Konten Utama) - Span 7 */}
+          <div className="lg:col-span-7 space-y-10">
+            {/* Price Highlight */}
+            <div className="bg-stone-50 border border-stone-200 rounded-3xl p-8 flex flex-col sm:flex-row items-baseline sm:items-center justify-between gap-4">
               <div>
                 <p className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2">
                   Harga Launching Unit Villa
                 </p>
-                <p className="text-4xl sm:text-6xl font-black text-amber-500 tracking-tight">
+                <p className="text-4xl sm:text-5xl lg:text-6xl font-black text-amber-500 tracking-tight">
                   {formatRupiah(PRICE_TOTAL)}
                 </p>
               </div>
             </div>
 
-            {/* Payment Steps */}
-            <div className="space-y-5">
+            {/* Payment Steps Timeline */}
+            <div className="relative space-y-6">
+              <div className="absolute left-[2.25rem] top-8 bottom-8 w-0.5 bg-stone-200 hidden sm:block z-0" />
+
               {PAYMENT_STEPS.map((item, index) => (
-                <article
+                <motion.article
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
                   key={index}
-                  className={`p-6 rounded-3xl border flex items-start gap-5 transition-all
+                  className={`relative z-10 p-6 sm:p-8 rounded-3xl border flex flex-col sm:flex-row items-start gap-6 transition-all duration-300 group
                     ${
                       item.highlight
-                        ? "bg-amber-50/50 border-amber-200 shadow-sm"
-                        : "bg-white border-stone-100 hover:border-stone-300"
+                        ? "bg-amber-50/50 border-amber-200 shadow-lg shadow-amber-100/50"
+                        : "bg-white border-stone-100 hover:border-stone-300 hover:shadow-md"
                     }
                   `}
                 >
                   <div
-                    className={`mt-1 p-3 rounded-full flex-shrink-0 ${
+                    className={`p-4 rounded-2xl flex-shrink-0 shadow-sm ${
                       item.highlight
                         ? "bg-amber-100 text-amber-600"
-                        : "bg-stone-100 text-stone-500"
+                        : "bg-stone-50 text-stone-500 group-hover:bg-stone-100"
                     }`}
                   >
                     {item.icon}
                   </div>
-                  <div>
-                    <h4 className="font-bold text-stone-900 text-xl flex items-center gap-3">
-                      {item.title}
+
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <h4 className="font-bold text-stone-900 text-xl">
+                        {item.title}
+                      </h4>
                       {item.highlight && (
-                        <span className="bg-red-500 text-white text-[10px] px-2.5 py-1 rounded-full shadow-sm">
-                          WOW
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm animate-pulse">
+                          AMAN
                         </span>
                       )}
-                    </h4>
+                    </div>
 
                     {item.customText ? (
-                      <p className="text-2xl sm:text-3xl font-black text-green-600 my-2 tracking-tight">
+                      <p className="text-2xl sm:text-3xl font-black text-emerald-600 my-2 tracking-tight">
                         {item.customText}
                       </p>
                     ) : (
@@ -410,82 +410,94 @@ export default function PaymentSchedulePage() {
                       {item.desc}
                     </p>
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
 
-            {/* Inline Form Component */}
-            <InlinePromoForm />
+            <div className="hidden lg:block">
+              <InlinePromoForm />
+            </div>
           </div>
 
-          {/* --- KOLOM KANAN DIPERKECIL (Span 4 dari 12) --- */}
-          {/* Membuat sidebar lebih compact dan tidak "kosong" */}
-          <div className="lg:col-span-4 w-full lg:sticky lg:top-28 space-y-8">
-            {/* Note Box */}
-            <div className="bg-red-50 border border-red-100 p-5 rounded-3xl flex gap-4 items-start text-sm text-red-800/90 leading-relaxed">
-              <Ban className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
-              <p>
-                <strong className="block mb-1 text-red-700 text-base">
+          <div className="lg:col-span-5 w-full lg:sticky lg:top-28 h-fit space-y-6">
+            <div className="bg-white border-l-4 border-red-500 shadow-lg shadow-red-100/30 p-6 rounded-r-2xl flex gap-4 items-start">
+              <Ban className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-stone-900 text-base mb-1">
                   Kenapa Tanpa DP?
-                </strong>
-                Agar Anda merasa aman. Uang besar Anda (Pelunasan) hanya keluar
-                ketika Anda sudah melihat fisik bangunan.
-              </p>
+                </h4>
+                <p className="text-sm text-stone-600 leading-relaxed">
+                  Agar Anda merasa aman. Uang besar Anda (Pelunasan) hanya
+                  keluar ketika bangunan sudah berdiri fisik. Tanpa Risiko.
+                </p>
+              </div>
             </div>
 
-            {/* ROI Calculator */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-stone-200">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-green-100 p-2.5 rounded-xl text-green-600">
+            {/* ROI Calculator Card */}
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] shadow-2xl shadow-stone-200/50 border border-stone-200 overflow-hidden relative">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600">
                   <TrendingUp size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-stone-900 leading-none">
-                    Simulasi Profit
+                  <h3 className="text-xl font-bold text-stone-900 leading-none">
+                    Simulasi Profit 
                   </h3>
-                  <p className="text-xs text-stone-500 mt-1.5 font-medium">
-                    Estimasi Occupancy 50%
+                  <p className="text-base text-stone-700 mt-2 font-medium flex flex-wrap items-center gap-1.5">
+                    Basis Sewa:
+                    <span className="bg-stone-100 text-stone-900 px-2 py-0.5 rounded-md font-bold border border-stone-200">
+                      Rp500.000 / malam
+                    </span>
                   </p>
                 </div>
               </div>
 
-              {/* Summary Box */}
-              <div className="bg-stone-900 rounded-2xl p-6 text-center text-white relative overflow-hidden mb-6">
-                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                  <PieChart size={80} aria-hidden="true" />
+              {/* Highlight Result */}
+              <div className="bg-stone-900 rounded-3xl p-6 text-center text-white relative overflow-hidden mb-8 group cursor-default">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
+                  <PieChart size={100} />
                 </div>
-                <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-2">
-                  Estimasi Balik Modal
-                </p>
-                <p className="text-4xl font-extrabold text-amber-400 mb-2">
-                  ± {BALIK_MODAL_TAHUN.toFixed(1)} Thn
-                </p>
-                <div className="h-1 w-12 bg-white/20 mx-auto rounded-full"></div>
+                <div className="relative z-10">
+                  <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-2">
+                    Estimasi Balik Modal (BEP)
+                  </p>
+                  <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500 mb-2">
+                    ± {BALIK_MODAL_TAHUN.toFixed(1)} Tahun
+                  </p>
+                  <div className="h-1 w-16 bg-stone-700 mx-auto rounded-full mt-4"></div>
+                </div>
               </div>
 
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center bg-stone-50 p-4 rounded-xl border border-stone-100">
-                  <span className="text-stone-600 font-medium">
-                    Omset (15 Hari terisi)
-                  </span>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                  <div className="flex flex-col">
+                    <span className="text-stone-600 text-sm font-medium">
+                      Omset Bulanan
+                    </span>
+                    <span className="text-[10px] text-stone-400">
+                      (Asumsi 15 hari terisi)
+                    </span>
+                  </div>
                   <span className="text-lg font-bold text-stone-900">
                     {formatRupiah(OMSET_BULANAN)}
                   </span>
                 </div>
 
-                {/* Pengeluaran */}
-                <div className="pl-4 border-l-2 border-slate-100 space-y-3 py-1">
-                  <div className="flex justify-between items-center text-xs sm:text-sm">
-                    <span className="text-stone-500 flex items-center gap-1.5">
-                      <Calculator size={14} /> Operasional
+                {/* Expenses */}
+                <div className="pl-4 border-l-2 border-stone-100 space-y-3 py-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-stone-500 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                      Operasional
                     </span>
                     <span className="text-red-500 font-medium">
                       - {formatRupiah(OPERASIONAL_TOTAL)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs sm:text-sm">
-                    <span className="text-stone-500 flex items-center gap-1.5">
-                      <User size={14} /> Management
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-stone-500 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                      Management
                     </span>
                     <span className="text-red-500 font-medium">
                       - {formatRupiah(MANAGEMENT_TOTAL)}
@@ -493,31 +505,51 @@ export default function PaymentSchedulePage() {
                   </div>
                 </div>
 
-                {/* Result Net */}
-                <div className="pt-5 border-t border-dashed border-stone-200">
-                  <p className="text-center text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">
+                {/* Net Result */}
+                <div className="pt-6 border-t border-dashed border-stone-200">
+                  <p className="text-center text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4">
                     Net Diterima Investor
                   </p>
 
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 p-5 rounded-2xl flex flex-col items-center shadow-sm text-center">
-                    <span className="font-bold text-green-800 text-xs uppercase tracking-wider mb-1">
-                      Per Bulan
-                    </span>
-                    <span className="text-3xl font-black text-green-600 tracking-tight">
-                      {formatRupiah(NET_INVESTOR_BULAN)}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 text-center">
-                    <p className="text-xs text-stone-500 mb-1">
-                      Potensi Per Tahun
-                    </p>
-                    <p className="text-lg font-extrabold text-stone-800">
-                      {formatRupiah(NET_INVESTOR_TAHUN)}
-                    </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex flex-col items-center text-center">
+                      <span className="font-bold text-emerald-800 text-[10px] uppercase tracking-wider mb-1">
+                        Per Bulan
+                      </span>
+                      <span className="text-xl font-black text-emerald-600 tracking-tight">
+                        {formatRupiah(NET_INVESTOR_BULAN)}
+                      </span>
+                    </div>
+                    <div className="bg-white border border-stone-200 p-4 rounded-2xl flex flex-col items-center text-center">
+                      <span className="font-bold text-stone-500 text-[10px] uppercase tracking-wider mb-1">
+                        Per Tahun
+                      </span>
+                      <span className="text-lg font-bold text-stone-800 tracking-tight">
+                        {formatRupiah(NET_INVESTOR_TAHUN)}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <div className="flex items-start gap-3 mt-4 text-xs text-amber-900 bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                  <AlertCircle
+                    size={16}
+                    className="mt-0.5 shrink-0 text-amber-600"
+                  />
+                  <p className="leading-relaxed font-medium">
+                    <strong className="block text-amber-700 mb-1">
+                      Catatan Penting:
+                    </strong>
+                    Angka di atas adalah simulasi. Pendapatan aktual dapat
+                    naik/turun menyesuaikan kondisi pasar (High/Low Season).
+                  </p>
+                </div>
               </div>
+            </div>
+
+            {/* Mobile-only Form Placement */}
+            <div className="block lg:hidden mt-8">
+              <InlinePromoForm />
             </div>
           </div>
         </div>

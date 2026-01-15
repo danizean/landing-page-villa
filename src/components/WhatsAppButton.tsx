@@ -3,18 +3,34 @@
 import { useState, useEffect } from "react";
 import { MessageCircle, X, Send, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 export default function WhatsAppButton() {
   const [open, setOpen] = useState(false);
   const [hasOpenedAuto, setHasOpenedAuto] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
 
-  // Mencegah hydration mismatch
+  const pathname = usePathname();
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
 
-  // Auto-open setelah 7 detik
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      { root: null, threshold: 0.1 }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (!isMounted) return;
 
@@ -29,6 +45,8 @@ export default function WhatsAppButton() {
     return () => clearTimeout(timer);
   }, [hasOpenedAuto, isMounted]);
 
+  if (!isMounted || pathname?.startsWith("/admin")) return null;
+
   const handleClose = () => {
     setOpen(false);
     sessionStorage.setItem("wa_popup_closed", "true");
@@ -42,7 +60,6 @@ export default function WhatsAppButton() {
   };
 
   const handleClick = () => {
-    // --- 1. TRACKING GTM (Client Side) ---
     if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({
         event: "whatsapp_click",
@@ -51,7 +68,6 @@ export default function WhatsAppButton() {
       });
     }
 
-    // --- 2. TRACKING META PIXEL (Client Side) ---
     if (typeof window !== "undefined" && (window as any).fbq) {
       (window as any).fbq("track", "Contact", {
         content_name: "Floating WhatsApp Button",
@@ -59,12 +75,8 @@ export default function WhatsAppButton() {
       });
     }
 
-    // --- 3. KIRIM NOTIFIKASI "CLICK" KE TELEGRAM (Background) ---
-    // Data dikirim diam-diam ke server agar Admin tetap dapat notif ada yang klik
     try {
-      const currentUrl = window.location.href;
       const searchParams = new URLSearchParams(window.location.search);
-
       fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,14 +96,9 @@ export default function WhatsAppButton() {
       console.error("Background notify error:", error);
     }
 
-    // --- 4. LOGIKA CTWA (Direct Open WhatsApp) ---
-    // Pesan CLEAN tanpa embel-embel Source URL
     const message =
       "Halo Admin Casa de Kayana, saya tertarik dengan promo Villa 250 Juta (Tanpa DP). Boleh minta info detail & pricelist-nya?";
-
-    // Nomor Admin
     const phoneNumber = "628138906004";
-
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
@@ -99,34 +106,43 @@ export default function WhatsAppButton() {
     window.open(url, "_blank");
   };
 
-  if (!isMounted) return null;
-
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 font-sans">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{
+        opacity: isFooterVisible ? 0 : 1,
+        y: isFooterVisible ? 20 : 0,
+        pointerEvents: isFooterVisible ? "none" : "auto",
+      }}
+      transition={{ duration: 0.3 }}
+      className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 font-sans"
+    >
       {/* Popup Bubble Chat */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{
-              duration: 0.3,
-              type: "spring",
-              stiffness: 260,
-              damping: 20,
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
             }}
-            className="relative bg-white rounded-2xl shadow-2xl w-[300px] overflow-hidden border border-slate-100 origin-bottom-right"
+            exit={{
+              opacity: 0,
+              y: 10,
+              scale: 0.95,
+              transition: { duration: 0.15, ease: "easeIn" },
+            }}
+            className="relative bg-white rounded-2xl shadow-2xl w-[300px] overflow-hidden border border-slate-100 origin-bottom-right transform-gpu will-change-transform"
           >
             {/* Header Admin */}
             <div className="bg-[#075e54] p-4 flex items-center justify-between shadow-md relative z-10">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  {/* Avatar Admin */}
                   <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#075e54] shadow-sm">
                     <User className="w-6 h-6" />
                   </div>
-                  {/* Green Dot Online */}
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-[#075e54] rounded-full animate-pulse"></div>
                 </div>
                 <div>
@@ -187,19 +203,18 @@ export default function WhatsAppButton() {
       {/* Floating Button Utama */}
       <motion.button
         onClick={handleToggle}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        aria-label="Chat WhatsApp Admin"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className="relative bg-[#25D366] hover:bg-[#20b858] text-white rounded-full p-4 shadow-[0_4px_20px_rgba(37,211,102,0.4)] transition-all duration-300 flex items-center justify-center group"
       >
-        {/* Ikon WA */}
         <MessageCircle size={36} className="fill-white" />
 
-        {/* Ping Animation (Ring Luar) */}
         {!open && (
           <span className="absolute -inset-1 rounded-full bg-[#25D366] opacity-30 animate-ping duration-1000"></span>
         )}
 
-        {/* Notification Badge (Merah) */}
+        {/* Notification Badge */}
         {!open && (
           <span className="absolute -top-1 -right-1 flex h-6 w-6 z-20">
             <span className="relative inline-flex rounded-full h-6 w-6 bg-red-500 text-white text-[11px] font-bold items-center justify-center border-2 border-white shadow-sm">
@@ -208,6 +223,6 @@ export default function WhatsAppButton() {
           </span>
         )}
       </motion.button>
-    </div>
+    </motion.div>
   );
 }

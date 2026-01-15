@@ -19,7 +19,35 @@ import { useSearchParams } from "next/navigation";
 
 const phonePattern = /^(?:\+62|0)[0-9]{9,14}$/;
 
-// --- MAIN WRAPPER (Safe for Next.js Build) ---
+// --- ANIMATION VARIANTS (Optimized) ---
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.3 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const modalVariants = {
+  hidden: { y: "100%", opacity: 0.5 },
+  visible: {
+    y: "0%",
+    opacity: 1,
+    transition: {
+      type: "tween",
+      ease: [0.32, 0.72, 0, 1],
+      duration: 0.4,
+    },
+  },
+  exit: {
+    y: "100%",
+    opacity: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeIn",
+    },
+  },
+};
+
+// --- MAIN WRAPPER ---
 export const LeadForm: React.FC = () => {
   return (
     <Suspense fallback={null}>
@@ -41,12 +69,35 @@ const LeadFormContent = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false); // State untuk deteksi footer
 
   // Hook Next.js
   const searchParams = useSearchParams();
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  // --- AUTO OPEN LOGIC ---
+  // --- 1. DETEKSI FOOTER (Agar tombol tidak menabrak footer) ---
+  useEffect(() => {
+    // Pastikan Anda memiliki tag <footer> di layout/halaman Anda
+    const footer = document.querySelector("footer");
+
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Jika footer terlihat (isIntersecting), set state true
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      {
+        root: null,
+        threshold: 0.1, // Trigger saat 10% footer mulai masuk layar
+      }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  // --- 2. AUTO OPEN LOGIC ---
   useEffect(() => {
     const alreadyClosed =
       typeof window !== "undefined"
@@ -94,12 +145,10 @@ const LeadFormContent = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Ambil UTM Parameters
       const utmSource = searchParams?.get("utm_source") || "direct";
       const utmMedium = searchParams?.get("utm_medium") || "-";
       const utmCampaign = searchParams?.get("utm_campaign") || "-";
 
-      // 2. Format Keterangan
       let finalKeterangan = form.keterangan.trim();
       if (form.jadwal) {
         const tgl = new Date(form.jadwal).toLocaleDateString("id-ID", {
@@ -111,7 +160,6 @@ const LeadFormContent = () => {
         finalKeterangan = `[Request Jadwal: ${tgl}] \n${finalKeterangan}`;
       }
 
-      // 3. Simpan ke Supabase
       const { error } = await supabase.from("leads").insert({
         nama: form.nama.trim(),
         domisili: form.domisili.trim(),
@@ -123,7 +171,6 @@ const LeadFormContent = () => {
 
       if (error) throw new Error(error.message);
 
-      // 4. Kirim Notifikasi API (Optional)
       const payload = JSON.stringify({
         ...form,
         jadwal: form.jadwal,
@@ -144,7 +191,6 @@ const LeadFormContent = () => {
         console.warn("Notification API failed silently");
       }
 
-      // 5. GTM Tracking Event
       if (typeof window !== "undefined" && (window as any).dataLayer) {
         (window as any).dataLayer.push({
           event: "lead_form_submit",
@@ -155,7 +201,6 @@ const LeadFormContent = () => {
         });
       }
 
-      // 6. UI Feedback
       toast.success("Berhasil! Tim kami akan menghubungi Anda segera.");
       setForm({
         nama: "",
@@ -177,11 +222,16 @@ const LeadFormContent = () => {
 
   return (
     <>
-      {/* --- FLOATING BUTTON --- */}
+      {/* --- FLOATING BUTTON (Dengan Footer Detection) --- */}
       <motion.button
+        // LOGIKA ANIMASI: Jika footer terlihat, tombol hilang (opacity 0, y: 50)
         initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2, type: "spring" }}
+        animate={{
+          opacity: isFooterVisible ? 0 : 1,
+          y: isFooterVisible ? 50 : 0,
+          pointerEvents: isFooterVisible ? "none" : "auto", // Nonaktifkan klik saat hidden
+        }}
+        transition={{ duration: 0.4, ease: "easeInOut" }} // Transisi halus
         onClick={handleOpen}
         className="fixed bottom-6 left-6 z-[90] bg-white text-slate-800 pl-2 pr-5 py-2 rounded-full shadow-2xl hover:scale-105 transition-transform group flex items-center gap-3 border border-slate-200"
         aria-label="Buka formulir konsultasi"
@@ -213,22 +263,23 @@ const LeadFormContent = () => {
           >
             {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              variants={backdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
               onClick={handleClose}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm will-change-opacity"
             />
 
             {/* Modal Card */}
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh]"
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] sm:max-h-[85vh] transform-gpu will-change-transform"
             >
-              {/* Header Visual - TANPA HARGA */}
+              {/* Header Visual */}
               <div className="bg-slate-900 relative text-white overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
                   <Coffee size={120} />
@@ -261,12 +312,11 @@ const LeadFormContent = () => {
                       <X size={20} />
                     </button>
                   </div>
-                  {/* Bagian harga sudah dihapus untuk tampilan lebih bersih */}
                 </div>
               </div>
 
               {/* Form Body */}
-              <div className="px-6 py-6 bg-slate-50 overflow-y-auto flex-1">
+              <div className="px-6 py-6 bg-slate-50 overflow-y-auto flex-1 overscroll-contain">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="relative group">
                     <User className="absolute left-3 top-3.5 w-4 h-4 text-slate-400 group-focus-within:text-slate-800 transition-colors pointer-events-none" />
@@ -343,12 +393,10 @@ const LeadFormContent = () => {
                   </div>
 
                   <div className="pt-2">
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
+                    <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-xl active:scale-[0.98]"
                     >
                       {isSubmitting ? (
                         "Sedang Mengirim..."
@@ -357,7 +405,7 @@ const LeadFormContent = () => {
                           Hubungi Konsultan Kami <ChevronRight size={18} />
                         </>
                       )}
-                    </motion.button>
+                    </button>
                     <div className="flex justify-center mt-4">
                       <p className="text-[10px] text-slate-500 flex items-center gap-1.5 text-center">
                         <ShieldCheck size={12} className="text-slate-400" />
