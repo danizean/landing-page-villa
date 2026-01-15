@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-// --- Helper: Hash Data untuk Keamanan & Kualitas Matching (SHA256) ---
 function hashSHA256(value?: string): string | undefined {
   if (!value) return undefined;
   return crypto
@@ -10,7 +9,6 @@ function hashSHA256(value?: string): string | undefined {
     .digest("hex");
 }
 
-// --- Helper: Generate Unique ID untuk Deduplikasi Event ---
 function generateEventId(): string {
   return crypto.randomUUID();
 }
@@ -21,10 +19,9 @@ export async function POST(request: Request) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   // --- META CAPI CONFIG ---
-  const PIXEL_ID = "750363290827556";
+  const PIXEL_ID = "1547111949891286";
   const ACCESS_TOKEN = process.env.META_CAPI_TOKEN;
 
-  // Cek Konfigurasi Telegram
   if (!botToken || !chatId) {
     console.error("❌ TELEGRAM CONFIG MISSING");
     return NextResponse.json(
@@ -47,12 +44,12 @@ export async function POST(request: Request) {
       user_agent,
     } = body;
 
-    // Ambil IP Address User
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "0.0.0.0";
 
-    // Format Jadwal agar mudah dibaca
+    const isClickOnly = nama === "Visitor (Click Only)" || whatsapp === "-";
+
     let jadwalString = "-";
     if (jadwal) {
       const dateObj = new Date(jadwal);
@@ -68,15 +65,24 @@ export async function POST(request: Request) {
       }
     }
 
-    // Format Nomor WA (62xxx) untuk link & hashing
-    const waNumber = whatsapp?.replace(/^0/, "62")?.replace(/\+/g, "");
+    let waNumber = "";
+    if (whatsapp && whatsapp !== "-" && whatsapp.length > 5) {
+      waNumber = whatsapp.replace(/^0/, "62").replace(/\+/g, "");
+    }
 
-    // --- 1. KIRIM NOTIFIKASI TELEGRAM ---
+    const telegramTitle = isClickOnly
+      ? "🖱️ *TRAFFIC: CLICK WA (FLOATING)*"
+      : "🔔 *LEADS BARU MASUK!*";
+
+    const waLinkDisplay = waNumber
+      ? `[${waNumber}](https://wa.me/${waNumber})`
+      : "-";
+
     const message = `
-🔔 *LEADS BARU MASUK!*
+${telegramTitle}
 
 👤 *Nama:* ${nama || "-"}
-📱 *WA:* ${waNumber ? `[${waNumber}](https://wa.me/${waNumber})` : "-"}
+📱 *WA:* ${waLinkDisplay}
 📍 *Domisili:* ${domisili || "-"}
 📅 *Jadwal Cek Lokasi:* ${jadwalString}
 
@@ -87,7 +93,7 @@ export async function POST(request: Request) {
 
 📝 *Pesan:* ${keterangan || "-"}
 
-_Segera follow up via Dashboard Admin_
+_Cek Dashboard untuk detail lengkap_
 `;
 
     await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -101,33 +107,37 @@ _Segera follow up via Dashboard Admin_
       }),
     });
 
-    // --- 2. KIRIM KE META CONVERSION API (SERVER-SIDE) ---
+    // --- 3. KIRIM KE META CONVERSION API (SERVER-SIDE) ---
     if (ACCESS_TOKEN) {
       const eventId = generateEventId();
+
+      const fbEventName = isClickOnly ? "Contact" : "Lead";
+      const fbValue = isClickOnly ? 0 : 0;
+
+      const userDataCapi = {
+        client_ip_address: ip,
+        client_user_agent: user_agent,
+        ph: waNumber ? [hashSHA256(waNumber)] : undefined,
+        fn: !isClickOnly && nama ? [hashSHA256(nama)] : undefined,
+        ct: !isClickOnly && domisili ? [hashSHA256(domisili)] : undefined,
+      };
 
       const eventData = {
         data: [
           {
-            event_name: "Lead",
+            event_name: fbEventName,
             event_time: Math.floor(Date.now() / 1000),
             event_id: eventId,
             action_source: "website",
-            // [UPDATE] Parameter URL Sumber Peristiwa (Wajib dicentang di Facebook)
             event_source_url:
-              request.headers.get("referer") || "https://www.haspro.me",
-
-            user_data: {
-              client_ip_address: ip,
-              client_user_agent: user_agent,
-              // Data sensitif di-hash SHA256 sesuai standar keamanan Meta
-              ph: waNumber ? [hashSHA256(waNumber)] : undefined,
-              fn: nama ? [hashSHA256(nama)] : undefined,
-              ct: domisili ? [hashSHA256(domisili)] : undefined,
-            },
+              request.headers.get("referer") || "https://www.casadekayana.com",
+            user_data: userDataCapi,
             custom_data: {
-              content_name: "Property Consultation",
+              content_name: isClickOnly
+                ? "WhatsApp Click"
+                : "Property Consultation",
               currency: "IDR",
-              value: 390000000, // Nilai Leads (bisa disesuaikan)
+              value: fbValue,
               lead_status: "new",
             },
           },

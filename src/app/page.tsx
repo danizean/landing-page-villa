@@ -4,15 +4,13 @@ import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 
-// --- DYNAMIC IMPORTS (Lazy Loading) ---
-// Komponen ini hanya akan di-load client-side saat dibutuhkan, menghemat bandwidth awal.
 const DesignConceptSection = dynamic(
   () =>
     import("@/components/DesignConceptSection").then(
       (mod) => mod.DesignConceptSection
     ),
   {
-    loading: () => <div className="h-screen bg-white" />, // Placeholder minimalis
+    loading: () => <div className="h-screen bg-white" />, 
   }
 );
 
@@ -25,7 +23,7 @@ const LocationDetail = dynamic(() =>
 );
 
 const PaymentSchedulePage = dynamic(
-  () => import("@/components/Pembayaran").then((mod) => mod.default) // Karena default export
+  () => import("@/components/Pembayaran").then((mod) => mod.default) 
 );
 
 const FAQs = dynamic(() => import("@/components/FAQs").then((mod) => mod.FAQs));
@@ -41,13 +39,10 @@ const Footer = dynamic(() =>
 export default function Home() {
   return (
     <>
-      {/* Navbar & Hero tetap eager load untuk LCP (Largest Contentful Paint) */}
       <Navbar />
 
       <main className="overflow-x-clip relative w-full">
         <Hero />
-
-        {/* Komponen di bawah ini akan di-hydrate secara lazy */}
         <DesignConceptSection />
         <FasilitasSection />
         <LocationDetail />

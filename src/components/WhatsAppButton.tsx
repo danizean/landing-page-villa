@@ -37,13 +37,12 @@ export default function WhatsAppButton() {
   const handleToggle = () => {
     setOpen(!open);
     if (!open) {
-      // Reset session storage agar pop up tidak dianggap "closed permanently" jika user membuka manual
       sessionStorage.removeItem("wa_popup_closed");
     }
   };
 
   const handleClick = () => {
-    // --- 1. TRACKING GTM ---
+    // --- 1. TRACKING GTM (Client Side) ---
     if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({
         event: "whatsapp_click",
@@ -52,7 +51,7 @@ export default function WhatsAppButton() {
       });
     }
 
-    // --- 2. TRACKING META PIXEL ---
+    // --- 2. TRACKING META PIXEL (Client Side) ---
     if (typeof window !== "undefined" && (window as any).fbq) {
       (window as any).fbq("track", "Contact", {
         content_name: "Floating WhatsApp Button",
@@ -60,22 +59,41 @@ export default function WhatsAppButton() {
       });
     }
 
-    // --- 3. LOGIKA PESAN (Casa de Kayana Specific) ---
-    let currentUrl = "";
-    if (typeof window !== "undefined") {
-      currentUrl = window.location.href;
+    // --- 3. KIRIM NOTIFIKASI "CLICK" KE TELEGRAM (Background) ---
+    // Data dikirim diam-diam ke server agar Admin tetap dapat notif ada yang klik
+    try {
+      const currentUrl = window.location.href;
+      const searchParams = new URLSearchParams(window.location.search);
+
+      fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama: "Visitor (Click Only)",
+          whatsapp: "-",
+          domisili: "-",
+          keterangan: "User mengklik tombol WhatsApp Floating (Direct CTWA)",
+          jadwal: new Date().toISOString(),
+          utm_source: searchParams.get("utm_source") || "floating_button",
+          utm_medium: searchParams.get("utm_medium") || "direct",
+          utm_campaign: searchParams.get("utm_campaign") || "-",
+          user_agent: navigator.userAgent,
+        }),
+      });
+    } catch (error) {
+      console.error("Background notify error:", error);
     }
 
-    // Pesan disesuaikan dengan Selling Point
-    const baseMessage =
+    // --- 4. LOGIKA CTWA (Direct Open WhatsApp) ---
+    // Pesan CLEAN tanpa embel-embel Source URL
+    const message =
       "Halo Admin Casa de Kayana, saya tertarik dengan promo Villa 250 Juta (Tanpa DP). Boleh minta info detail & pricelist-nya?";
-    const finalMessage = `${baseMessage}\n\n(Source: ${currentUrl})`;
 
-    // Nomor Admin Casa de Kayana
+    // Nomor Admin
     const phoneNumber = "628138906004";
 
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      finalMessage
+      message
     )}`;
 
     window.open(url, "_blank");

@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://www.haspro.me/sitemap.xml
+Sitemap: https://www.casadekayana.com/sitemap.xml

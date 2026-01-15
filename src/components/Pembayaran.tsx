@@ -392,7 +392,7 @@ export default function PaymentSchedulePage() {
                       {item.title}
                       {item.highlight && (
                         <span className="bg-red-500 text-white text-[10px] px-2.5 py-1 rounded-full shadow-sm">
-                          POPULER
+                          WOW
                         </span>
                       )}
                     </h4>

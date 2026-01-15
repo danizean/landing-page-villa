@@ -2,32 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- 1. BASE STYLES --- */
 @layer base {
   :root {
-    /* Define colors for easy consistency if needed later */
-    --color-primary: 245 158 11; /* Amber 500 */
+    --color-primary: 245 158 11; 
   }
 
   html {
     scroll-behavior: smooth;
-    /* PENTING: Jarak scroll agar judul tidak tertutup Navbar Sticky */
     scroll-padding-top: 100px;
-    /* Mencegah layout shift horizontal */
     overflow-x: hidden;
   }
 
   body {
     @apply bg-[#F9FAFB] text-slate-800 antialiased font-sans leading-relaxed;
-    /* Font Rendering Optimization */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Mobile UX: Hapus highlight biru saat tap */
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Kustomisasi Scrollbar (Tema Mewah/Gold) - Webkit Only */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -42,42 +35,32 @@
   }
 }
 
-/* --- 2. COMPONENTS --- */
 @layer components {
-  /* Text Gradient Emas */
   .text-gradient-gold {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-[length:200%_auto] animate-gradient-x;
   }
 
-  /* Button Primary Style - Optimized States */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 bg-amber-500 text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-amber-500/30 transition-all duration-300;
-    /* Hover & Active States */
     @apply hover:bg-amber-600 hover:-translate-y-0.5 hover:shadow-amber-500/40;
     @apply active:scale-95 active:shadow-sm;
-    /* Focus State for A11y */
     @apply focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2;
   }
 }
 
-/* --- 3. UTILITIES --- */
 @layer utilities {
-  /* Hide Scrollbar (Cross-browser) */
   .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
   }
   .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
   }
 
-  /* GPU Acceleration Helper (Lebih aman dari will-change) */
   .gpu {
     transform: translateZ(0);
     backface-visibility: hidden;
   }
 
-  /* Text Shadow Utilities */
   .text-shadow-sm {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
@@ -86,9 +69,7 @@
   }
 }
 
-/* --- 4. ANIMATIONS --- */
 
-/* Infinite Scroll */
 @keyframes infinite-scroll {
   from {
     transform: translateX(0);
@@ -101,7 +82,6 @@
   animation: infinite-scroll 25s linear infinite;
 }
 
-/* Gradient Flow */
 @keyframes gradient-x {
   0% {
     background-position: 0% 50%;
@@ -117,7 +97,6 @@
   animation: gradient-x 4s ease infinite;
 }
 
-/* Shimmer Effect */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -137,7 +116,6 @@
   animation: shimmer 2s infinite;
 }
 
-/* Float Animation */
 @keyframes float {
   0%,
   100% {
@@ -151,9 +129,6 @@
   animation: float 3s ease-in-out infinite;
 }
 
-/* --- 5. MEDIA QUERIES (Performance & Print) --- */
-
-/* Respect User Motion Preference (Performance & Accessibility) */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -172,14 +147,12 @@
   }
 }
 
-/* Print Styles (Untuk user yang ingin print brosur web) */
 @media print {
   body {
     background: white;
     color: black;
   }
 
-  /* Sembunyikan elemen navigasi saat print */
   nav,
   header,
   #faq,
@@ -189,7 +162,7 @@
     display: none !important;
   }
 
-  /* Pastikan text hitam pekat */
+
   p,
   h1,
   h2,

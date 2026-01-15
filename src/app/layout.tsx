@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 5, // Accessibility: Allow users to zoom
 };
 
-// --- 2. SEO METADATA ---
+// --- 2. SEO METADATA (DIPERKAYA) ---
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.casadekayana.com"),
   title: {
@@ -30,23 +30,38 @@ export const metadata: Metadata = {
     template: "%s | Casa de Kayana",
   },
   description:
-    "Miliki villa bohemian modern di Jalan Kaliurang Yogyakarta mulai Rp250 juta. Fasilitas Private Pool, Full Furnished, dan Skema Bayar Tanpa DP. Aman & Menguntungkan.",
+    "Miliki aset produktif villa bohemian modern di Jalan Kaliurang Yogyakarta mulai Rp250 juta. Fasilitas Private Pool, Full Furnished, Legalitas Aman (SHM), dan Potensi Passive Income Tinggi. Investasi properti terbaik di Sleman.",
   keywords: [
     "casa de kayana",
+    "casa de kayana jogja",
+    "villa bohemian modern",
     "villa dijual yogyakarta",
+    "villa jalan kaliurang",
     "investasi properti jakal",
     "villa dekat kampus UII",
+    "properti sleman yogyakarta",
+    "villa dekat merapi",
+    "tanah dijual kaliurang",
     "villa murah jogja 250 juta",
+    "investasi villa modal kecil",
+    "investasi tanpa dp jogja",
+    "passive income properti",
+    "properti produktif jogja",
+    "jual beli villa jogja",
+    "harga villa casa de kayana",
+    "investasi properti aman jogja",
+    "beli villa untuk pensiun",
     "villa private pool jogja",
     "hunian mahasiswa eksklusif",
     "kost elit yogyakarta",
-    "investasi tanpa dp jogja",
-    "villa bohemian modern",
-    "passive income properti",
-    "properti sleman yogyakarta",
-    "beli villa di jogja untuk pensiun",
-    "villa dekat tempat wisata merapi",
-    "investasi properti aman jogja",
+    "villa full furnished jogja",
+    "smart home system villa",
+    "villa instagramable jogja",
+    "investasi untuk milenial",
+    "tabungan properti",
+    "rumah kedua di jogja",
+    "staycation jogja",
+    "management asset properti",
   ],
   authors: [{ name: "Casa de Kayana Team" }],
   creator: "Casa de Kayana",
@@ -75,11 +90,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Casa de Kayana | Villa Eksklusif Rp250 Juta di Jogja",
+    title: "Investasi Villa Jogja Rp250 Juta | Casa de Kayana",
     description:
-      "Investasi cerdas hunian estetik dengan private pool. Lokasi selangkah dari UII Jakal. Booking sekarang, bayar lunas saat jadi.",
+      "Peluang investasi properti di Jogja dengan skema Tanpa DP. Lokasi strategis selangkah dari UII Jakal. Private Pool & Full Furnished. Booking sekarang!",
     url: "https://www.casadekayana.com",
-    siteName: "Casa de Kayana",
+    siteName: "Casa de Kayana Property",
     locale: "id_ID",
     type: "website",
     images: [
@@ -87,7 +102,7 @@ export const metadata: Metadata = {
         url: "https://www.casadekayana.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Casa de Kayana - Villa Bohemian Modern Yogyakarta",
+        alt: "Casa de Kayana - Investasi Villa Terbaik di Yogyakarta",
       },
     ],
   },
@@ -95,7 +110,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Casa de Kayana - Investasi Villa Jogja Paling Aman",
     description:
-      "Miliki aset produktif di Jogja mulai Rp250 Juta. Tanpa DP, Private Pool, Dekat UII.",
+      "Miliki aset produktif di Jogja mulai Rp250 Juta. Tanpa DP, Private Pool, Dekat UII. Potensi sewa tinggi.",
     images: ["https://www.casadekayana.com/og-image.jpg"],
     creator: "@casadekayana",
   },
@@ -109,10 +124,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // CONFIG IDs
-  const PIXEL_ID = "750363290827556";
+  const PIXEL_ID = "1547111949891286";
   const GTM_ID = "GTM-WT79LLNQ";
   const CLARITY_ID = "uvr74fo44y";
+  const GA_ID = "G-EF6RLJYKKH";
 
   return (
     <html lang="id" className="scroll-smooth">
@@ -122,7 +137,26 @@ export default function RootLayout({
           "antialiased bg-[#F9FAFB] text-slate-900"
         )}
       >
-        {/* --- 1. GOOGLE TAG MANAGER (HEAD SCRIPT) --- */}
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
+
+        {/* --- 2. GOOGLE TAG MANAGER (HEAD SCRIPT) --- */}
         <Script
           id="gtm-script"
           strategy="afterInteractive"
@@ -137,7 +171,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* --- 2. GOOGLE TAG MANAGER (BODY NOSCRIPT) --- */}
+        {/* --- 3. GOOGLE TAG MANAGER (BODY NOSCRIPT) --- */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -148,7 +182,7 @@ export default function RootLayout({
           ></iframe>
         </noscript>
 
-        {/* --- 3. META PIXEL SCRIPT --- */}
+        {/* --- 4. META PIXEL SCRIPT --- */}
         <Script
           id="fb-pixel"
           strategy="afterInteractive"
@@ -179,7 +213,7 @@ export default function RootLayout({
           />
         </noscript>
 
-        {/* --- 4. MICROSOFT CLARITY --- */}
+        {/* --- 5. MICROSOFT CLARITY --- */}
         <Script
           id="microsoft-clarity"
           strategy="afterInteractive"

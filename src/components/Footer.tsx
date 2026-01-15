@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import InstaIcon from '../assets/icons/instagram.png';
-import TiktokIcon from '../assets/icons/tiktok.png';
-import FacebookIcon from '../assets/icons/facebook.png';
+import Image from "next/image";
+import InstaIcon from "../assets/icons/instagram.png";
+import TiktokIcon from "../assets/icons/tiktok.png";
+import FacebookIcon from "../assets/icons/facebook.png";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -17,8 +17,11 @@ export const Footer = () => {
         {/* Left Text */}
         <div className="text-center md:text-left">
           <p className="text-sm text-white/70">
-            © {currentYear}{' '}
-            <span className="font-semibold text-white">Haspro Agency</span>. All rights reserved.
+            © {currentYear}{" "}
+            <span className="font-semibold text-white">
+              Omzet Naik Properti
+            </span>
+            . All rights reserved.
           </p>
           <p className="text-xs text-white/50 mt-1">
             Empowering property investment with trust & transparency.
@@ -31,7 +34,7 @@ export const Footer = () => {
             {/* Instagram */}
             <li>
               <a
-                href="https://www.instagram.com/hasproagency"
+                href="https://www.instagram.com/casadekayana"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -47,29 +50,10 @@ export const Footer = () => {
               </a>
             </li>
 
-            {/* TikTok */}
-            <li>
-              <a
-                href="https://www.tiktok.com/@hasproagency_"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="group p-2 rounded-full hover:bg-white/10 transition"
-              >
-                <Image
-                  src={TiktokIcon}
-                  alt="TikTok"
-                  width={26}
-                  height={26}
-                  className="opacity-80 transition-transform duration-300 group-hover:scale-110 group-hover:opacity-100"
-                />
-              </a>
-            </li>
-
             {/* Facebook */}
             <li>
               <a
-                href="https://www.facebook.com/hasproagency1"
+                href="https://www.facebook.com/casadekayana/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
