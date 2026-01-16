@@ -18,11 +18,10 @@ const dmSans = DM_Sans({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fbbf24", // Matches Amber-500 brand color
-  maximumScale: 5, // Accessibility: Allow users to zoom
+  themeColor: "#fbbf24",
+  maximumScale: 5,
 };
 
-// --- 2. SEO METADATA (DIPERKAYA) ---
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.casadekayana.com"),
   title: {
@@ -30,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | Casa de Kayana",
   },
   description:
-    "Miliki aset produktif villa bohemian modern di Jalan Kaliurang Yogyakarta mulai Rp250 juta. Fasilitas Private Pool, Full Furnished, Legalitas Aman (SHM), dan Potensi Passive Income Tinggi. Investasi properti terbaik di Sleman.",
+    "Miliki aset produktif villa bohemian modern di Jalan Kaliurang Yogyakarta mulai Rp250 juta. Fasilitas Private Pool, Full Furnished, Legalitas Leasehold 20 Tahun, dan Potensi Passive Income Tinggi. Investasi properti terbaik di Sleman.",
   keywords: [
     "casa de kayana",
     "casa de kayana jogja",
